@@ -1,4 +1,4 @@
-import { normalize } from 'path';
+import { normalize, relative } from 'path';
 import * as vscode from 'vscode';
 import { isDirectory, fileExistsByName } from './fsHelpers';
 import { homedir } from 'os';
@@ -62,6 +62,23 @@ export const getTargetPath = async (
   }
 
   return resource as vscode.Uri | undefined;
+};
+
+export const getDirectory = (
+  targetUri: vscode.Uri | undefined,
+  workspaceUri: vscode.Uri | undefined
+): string | undefined => {
+  if (!targetUri) {
+    vscode.window.showErrorMessage("Couldn't find target");
+    return;
+  }
+
+  if (!workspaceUri) {
+    vscode.window.showErrorMessage("Couldn't find workspace");
+    return;
+  }
+
+  return relative(workspaceUri.path, targetUri.path);
 };
 
 export const openFile = async (filePath: string) => {

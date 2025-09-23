@@ -4,6 +4,7 @@ import createStructure from '../actions/createStructure';
 import { FolderStructure, FolderTemplate, StringReplaceTuple } from '../types';
 import getReplaceValueTuples from '../lib/getReplaceValueTuples';
 import {
+  getDirectory,
   getGlobalTemplatePath,
   getLocalTemplatePath,
   getTargetPath,
@@ -19,7 +20,6 @@ import {
 import { fileExists, getFullFilePath, isDirectory } from '../lib/fsHelpers';
 import { relative } from 'path';
 import { chmodSync } from 'fs';
-import { minimatch } from 'minimatch';
 
 const CreateFolderStructure = async (
   resource: vscode.Uri | string | undefined,
@@ -27,6 +27,7 @@ const CreateFolderStructure = async (
 ) => {
   const workspaceUri = await getWorkspaceUri();
   const targetUri = await getTargetPath(resource, workspaceUri);
+  const fDirectory = getDirectory(targetUri, workspaceUri);
 
   const templateFolderPaths = [
     await getLocalTemplatePath(targetUri),
@@ -101,6 +102,16 @@ const CreateFolderStructure = async (
   const replaceValueTuples = ftNameTuple.concat(
     await getReplaceValueTuples(customVariables || [])
   );
+
+  if (fDirectory) {
+    const directory = fDirectory.split(/\\|\//).at(-1) as string;
+
+    replaceValueTuples.push(
+      ['FTFDirectory', fDirectory],
+      ['FTDirectory', directory]
+    );
+  }
+
   const fsPath = (absolutePath ? workspaceUri : targetUri)?.fsPath;
 
   const structureContents = files.map((row) => ({
