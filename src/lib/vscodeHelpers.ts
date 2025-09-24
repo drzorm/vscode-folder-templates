@@ -78,7 +78,7 @@ export const getDirectory = (
     return;
   }
 
-  return relative(workspaceUri.path, targetUri.path);
+  return relative(workspaceUri.path, targetUri.path).replace(/\\/, "/");
 };
 
 export const openFile = async (filePath: string) => {
